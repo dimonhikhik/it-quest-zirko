@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>CORE BATTLE | ФІНАЛ</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Share+Tech+Mono&family=Kelly+Slab&display=swap" rel="stylesheet">
+<style>
+  :root { --red: #ff0033; --blue: #00d4ff; --bg: #050000; }
+  body { 
+    background: var(--bg); color: var(--blue); 
+    font-family: 'Share Tech Mono', monospace; 
+    margin: 0; overflow: hidden; height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+
+  /* Шкала загрози */
+  .threat-container {
+    width: 80%; max-width: 600px; height: 40px;
+    border: 2px solid var(--red); position: relative; margin-bottom: 10px;
+    background: rgba(255, 0, 0, 0.1);
+  }
+  #threat-bar {
+    width: 0%; height: 100%; background: var(--red);
+    transition: width 0.2s linear;
+    box-shadow: 0 0 20px var(--red);
+  }
+
+  .status-text { font-family: 'Orbitron'; font-size: 14px; color: var(--red); margin-bottom: 30px; }
+
+  /* Зона терміналу */
+  .battle-zone {
+    background: rgba(0, 20, 40, 0.9); border: 2px solid var(--blue);
+    padding: 30px; width: 90%; max-width: 500px; text-align: center;
+    box-shadow: 0 0 40px rgba(0, 212, 255, 0.2);
+  }
+
+  #word-to-type {
+    font-size: 48px; font-weight: bold; margin-bottom: 20px;
+    letter-spacing: 5px; text-shadow: 0 0 10px var(--blue);
+    min-height: 60px;
+  }
+
+  input {
+    background: transparent; border: none; border-bottom: 2px solid var(--blue);
+    color: white; font-size: 32px; text-align: center; width: 100%;
+    outline: none; font-family: inherit; text-transform: uppercase;
+  }
+
+  /* Фінальний екран прощання */
+  #glitch-overlay {
+    display: none; position: fixed; inset: 0; background: white; z-index: 2000; opacity: 0.8;
+  }
+
+  #final-msg {
+    display: none; position: fixed; inset: 0; background: black;
+    z-index: 1000; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px; color: var(--blue); text-align: center;
+  }
+
+  .crawling-text {
+    max-width: 850px; font-family: 'Kelly Slab', serif; 
+    font-size: 26px; line-height: 1.6;
+  }
+
+  .word { opacity: 0; display: inline-block; transition: opacity 0.6s ease; margin-right: 10px; }
+  .word.visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div id="glitch-overlay"></div>
+
+<div class="status-text">УВАГА: P1-VEN ЗАХОПЛЮЄ ЯДРО... <span id="timer-val">0</span>%</div>
+<div class="threat-container">
+  <div id="threat-bar"></div>
+</div>
+
+<div class="battle-zone">
+  <div style="font-size: 14px; margin-bottom: 10px; color: #555;">ВВЕДІТЬ АНТИДОТ:</div>
+  <div id="word-to-type">ПОЧАТИ</div>
+  <input type="text" id="battle-input" autocomplete="off" autofocus>
+</div>
+
+<div id="final-msg">
+  <div class="crawling-text" id="final-text-container"></div>
+</div>
+
+<script>
+const words = ['ПОЧАТИ', 'ЗІРКА', 'КОД', 'ВІРУС', 'СТОП', 'ЯДРО', 'СВІТЛО', 'КЛЮЧ'];
+let currentWordIdx = 0;
+let threatLevel = 0;
+let isGameOver = false;
+
+const threatBar = document.getElementById('threat-bar');
+const wordDisplay = document.getElementById('word-to-type');
+const input = document.getElementById('battle-input');
+const finalMsg = document.getElementById('final-msg');
+
+wordDisplay.textContent = words[currentWordIdx];
+
+const threatInterval = setInterval(() => {
+  if (isGameOver) return;
+  threatLevel += 1.0; 
+  threatBar.style.width = threatLevel + '%';
+  document.getElementById('timer-val').textContent = Math.floor(threatLevel);
+
+  if (threatLevel >= 100) {
+    clearInterval(threatInterval);
+    alert('P1-VEN ПЕРЕМІГ! Система видалена.');
+    location.reload();
+  }
+}, 300);
+
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const userValue = input.value.toUpperCase().trim();
+    const targetWord = words[currentWordIdx];
+
+    if (userValue === targetWord) {
+      threatLevel = Math.max(0, threatLevel - 15); 
+      currentWordIdx++;
+      
+      if (currentWordIdx >= words.length) {
+        isGameOver = true;
+        clearInterval(threatInterval);
+        showEnding();
+      } else {
+        wordDisplay.textContent = words[currentWordIdx];
+        wordDisplay.style.color = '#fff';
+        setTimeout(() => wordDisplay.style.color = 'var(--blue)', 100);
+      }
+    } else {
+      wordDisplay.style.color = 'var(--red)';
+      setTimeout(() => wordDisplay.style.color = 'var(--blue)', 400);
+    }
+    input.value = '';
+  }
+});
+
+function showEnding() {
+  const overlay = document.getElementById('glitch-overlay');
+  const container = document.getElementById('final-text-container');
+  const fullText = "Ви встигли. Систему ізольовано. Світ у безпеці, але мій дім тепер тут — між нулем та одиницею. Не бійтеся технологій, але пам'ятайте: машина може імітувати серце, але ніколи не зможе відчути відповідальність за іншого. Я залишаюся тут, щоб бути вашим щитом у мережі. Прощавайте... і вимкніть нарешті цей монітор. Справжнє життя — по той бік скла. Професор Зірко.";
+
+  // Спалах
+  overlay.style.display = 'block';
+  setTimeout(() => { 
+    overlay.style.display = 'none'; 
+    finalMsg.style.display = 'flex';
+    
+    // Створення слів
+    fullText.split(' ').forEach(word => {
+      const span = document.createElement('span');
+      span.textContent = word;
+      span.className = 'word';
+      container.appendChild(span);
+    });
+
+    // Повільна поява
+    const spans = container.querySelectorAll('.word');
+    spans.forEach((span, index) => {
+      setTimeout(() => {
+        span.classList.add('visible');
+      }, index * 450); // Швидкість появи слів
+    });
+  }, 200);
+}
+</script>
+</body>
+</html>

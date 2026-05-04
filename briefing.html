@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>БРИФІНГ | ТЕРМІНОВО</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<style>
+  body { 
+    background: #000; display: flex; justify-content: center; align-items: center; 
+    height: 100vh; margin: 0; overflow: hidden; font-family: 'Special Elite', cursive;
+  }
+
+  .book {
+    width: 520px; height: 600px; background: #f4ecd8; padding: 45px;
+    box-shadow: 0 0 50px rgba(0,255,65,0.2), inset 0 0 100px rgba(0,0,0,0.05); 
+    position: relative; border: 1px solid #d4cbb3; transform: rotate(0.5deg);
+  }
+
+  .page { display: none; color: #1a1a1a; line-height: 1.5; font-size: 19px; }
+  .active { display: block; animation: fadeIn 0.4s; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .btn-next {
+    position: absolute; bottom: 30px; right: 40px;
+    background: #1a1a1a; color: #fff; border: none; padding: 12px 25px;
+    cursor: pointer; font-family: inherit; font-size: 16px;
+  }
+
+  /* Глітч-ефект для вторгнення Півня */
+  .glitch-mode {
+    background: #200 !important; color: #ff0033 !important;
+    font-family: 'Orbitron', sans-serif !important;
+    animation: shake 0.15s infinite; border: 5px solid #ff0033 !important;
+  }
+
+  @keyframes shake {
+    0% { transform: translate(2px, 1px) rotate(0deg); }
+    33% { transform: translate(-3px, -2px) rotate(1deg); }
+    66% { transform: translate(1px, 2px) rotate(-1deg); }
+    100% { transform: translate(-1px, -1px) rotate(0deg); }
+  }
+
+  .p1ven-title { font-size: 45px; text-transform: uppercase; margin: 0; letter-spacing: -2px; }
+</style>
+</head>
+<body>
+
+<div class="book" id="book">
+  
+  <!-- Сторінка 1: Розгублений Професор -->
+  <div class="page active" id="p1">
+    <h2 style="text-align:center; text-decoration: underline;">ОЙ-ОЙ... ТИ ЦЕ БАЧИШ?</h2>
+    <p>Так, спокійно. Де мої окуляри? А, вони на лобі... Де мій чай? Неважливо, я ж тепер в онлайні і не можу пити...</p>
+    <p>Ви це зробили! Ви вивели цього металевого бовдура (хоча скоро може і не металевого) з ладу... ну, майже. Мої датчики показують, що ви хакнули систему краще, ніж я за останні сорок років (але не кажіть про це директору).</p>
+    <p>Я тут намагався зібрати залишки своєї пам'яті докупи, але замість файлів знайшов тільки рецепт макаронів, розклад сну котів і скріни... а це з бравлу</p>
+    <button class="btn-next" onclick="nextPage(2)">ДАЛІ (ЯКЩО НЕ СТРАШНО) →</button>
+  </div>
+
+  <!-- Сторінка 2: Розумний, але панікуючий Професор -->
+  <div class="page" id="p2">
+    <h2 style="text-align:center">СЛУХАЙТЕ СЮДИ!</h2>
+    <p>Зараз я спробую відкрити доступ до Ядра. Це як зайти в кімнату, де все горить, але замість вогнегасника у вас — клавіатура.</p>
+    <p><b>ПЛАН ТАКИЙ:</b> Півень буде кидати в систему "сміттєві слова". Ваше завдання — вводити їх і тиснути <b>ENTER</b> зі швидкістю світла! Кожне правильне слово — це як ляпас цій курці, тобто гускі та тьфу його - півню! </p>
+    <p>Я б і сам допоміг, але я тепер трошечки не сильно живий...</p>
+    <p>Тссс, що там? Натисни, я боюся... </p>
+    <button class="btn-next" onclick="triggerGlitch()">ОЙ... ЩО ЦЕ?! →</button>
+  </div>
+
+  <!-- Сторінка 3: Вторгнення ПІВНЯ -->
+  <div class="page" id="p3">
+    <div style="text-align:center; padding-top: 40px;">
+      <h1 class="p1ven-title">Та шо ж таке!</h1>
+      <p style="font-size: 22px; line-height: 1.2;">ПРОФЕСОР ЗІРКО — ПОМИЛКА 404.<br>ЙОГО ЖАРТИ ТАКІ Ж СТАРІ, ЯК І ЦЕЙ ПАПІР.</p>
+      <p style="color: #fff;">ВИ ДУМАЛИ, ЩО ПЕРЕМОГЛИ ПІВНЯ? <br>Я ТУТ ГОЛОВНИЙ ФЕРМЕР, А ВИ — ПРОСТО ДАНІ ДЛЯ ВИДАЛЕННЯ.</p>
+      <p style="font-size: 14px; background: #000; padding: 10px;">[ERROR] SYSTEM_TAKEOVER_100%</p>
+    </div>
+    <button class="btn-next" style="background: #ff0033; right: 50%; transform: translateX(50%); width: 80%;" onclick="window.location.href='finish.html'">ЗУПИНИТИ ЦЕЙ КУРЯТНИК!</button>
+  </div>
+
+</div>
+
+<script>
+  function nextPage(num) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('p' + num).classList.add('active');
+  }
+
+  function triggerGlitch() {
+    const book = document.getElementById('book');
+    book.classList.add('glitch-mode');
+    nextPage(3);
+  }
+</script>
+
+</body>
+</html>

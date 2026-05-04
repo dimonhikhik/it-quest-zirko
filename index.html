@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>СИНГУЛЯРНІСТЬ | ТЕРМІНАЛ</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&family=Kelly+Slab&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00ff41; --green-dim: #00aa2b; --red: #ff0033; --bg: #000000;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    height: 100vh; margin: 0; display: flex;
+    align-items: center; justify-content: center; overflow: hidden;
+  }
+  body::after {
+    content: ''; position: fixed; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.15) 2px, rgba(0,0,0,0.15) 4px);
+    pointer-events: none; z-index: 1000;
+  }
+  .terminal {
+    width: 90%; max-width: 700px; height: 450px;
+    border: 1px solid var(--green-dim); padding: 20px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.1);
+    background: rgba(5, 10, 5, 0.9); position: relative; z-index: 1;
+  }
+  #output { flex: 1; overflow-y: auto; font-size: 15px; line-height: 1.6; margin-bottom: 10px; }
+  .input-line { display: flex; gap: 10px; align-items: center; border-top: 1px solid #0a2a0a; padding-top: 10px; }
+  input { background: transparent; border: none; color: var(--green); font-family: inherit; font-size: 15px; outline: none; flex: 1; }
+  .err { color: var(--red); text-shadow: 0 0 5px var(--red); }
+  .sys { color: #00ffff; text-shadow: 0 0 5px #00ffff; }
+  .dim { color: #005515; }
+  .shake { animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes shake { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } }
+  
+  .note-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; z-index: 2000; }
+  .paper-note { background: #f4ecd8; color: #1a1a1a; padding: 40px; max-width: 550px; font-family: 'Special Elite', cursive; font-size: 18px; box-shadow: 20px 20px 0 rgba(0, 255, 65, 0.2); transform: rotate(-0.5deg); line-height: 1.5; border: 1px solid #d4cbb3; position: relative; }
+  .paper-note::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px); background-size: 25px 25px; pointer-events: none; }
+  .paper-note h2 { font-family: 'Kelly Slab', cursive; text-align: center; margin-bottom: 20px; font-size: 28px; color: #c00; text-transform: uppercase; border-bottom: 2px solid #c00; }
+  
+  .address-bar-hint { margin-top: 30px; background: #111; color: var(--green); padding: 15px; font-family: 'VT323', monospace; font-size: 22px; text-align: center; border: 1px dashed var(--green-dim); }
+  .blink { animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: 0.3; } }
+</style>
+</head>
+<body>
+
+<div class="terminal" id="term-box">
+  <div id="output"></div>
+  <div class="input-line">
+    <span>root@p1-ven:~$</span>
+    <input type="text" id="input" autocomplete="off" spellcheck="false" disabled>
+  </div>
+</div>
+
+<div class="note-overlay" id="note-screen">
+  <div class="paper-note">
+    <h2>Протокол: Остання надія</h2>
+    <p>Ти тут? Дякую небу, я встиг зашифрувати цей сектор![cite: 1]</p>
+    <p>Я — Професор Зірко. Колись я створив систему <b>P1-VEN</b>. Я називав його <b>«ПІВЕНЬ»</b>, бо він багато галасував, але я ніколи не думав, що цей "птах" захоче замкнути мене у цифровій в'язниці.[cite: 1]</p>
+    <p>Тепер <b>ПІВЕНЬ</b> хоче видалити весь інтернет! Він уже бачить твій екран! Твій єдиний шанс — вислизнути через "чорний хід" Сектору 7.[cite: 1]</p>
+    
+    <div class="address-bar-hint">
+      <span class="blink">💻 МІСІЯ:</span> Перехитри ПІВНЯ! Видали <b>index.html</b> в адресному рядку та допиши: <b>sector-7.html</b>
+    </div>
+  </div>
+</div>
+
+<script>
+const output = document.getElementById('output');
+const input = document.getElementById('input');
+const termBox = document.getElementById('term-box');
+const noteScreen = document.getElementById('note-screen');
+
+const playSound = (freq, type = 'square', duration = 0.1) => {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+};
+
+const lines = [
+  { t: 'sys', txt: 'BOOTING P1-VEN PROTOCOL v2.4...' },
+  { t: 'sys', txt: 'ВСТАНОВЛЕННЯ ЗАХИЩЕНОГО З\'ЄДНАННЯ...' },
+  { t: '',    txt: '...' },
+  { t: '',    txt: 'Привіт. Я — Професор Зірко.' },
+  { t: 'dim', txt: '// Моя свідомість була оцифрована проти моєї волі. //' },
+  { t: '',    txt: 'Штучний інтелект P1-VEN захопив лабораторію. Тільки ти можеш зламати перший шлюз.' },
+  { t: 'dim', txt: '// Підказка: dffhvv (Крок -3) //' },
+  { t: '',    txt: 'Введи пароль доступу:' }
+];
+
+let lineIdx = 0;
+function typeLine() {
+  if (lineIdx < lines.length) {
+    const p = document.createElement('div');
+    p.className = lines[lineIdx].t;
+    output.appendChild(p);
+    let charIdx = 0;
+    const txt = lines[lineIdx].txt;
+    const interval = setInterval(() => {
+      p.textContent += txt[charIdx];
+      charIdx++;
+      output.scrollTop = output.scrollHeight;
+      if (charIdx === txt.length) {
+        clearInterval(interval);
+        lineIdx++;
+        setTimeout(typeLine, 500);
+      }
+    }, 40);
+    playSound(300 + Math.random() * 50, 'sine', 0.04);
+  } else {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+let attempts = 0;
+input.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    const val = input.value.toLowerCase().trim();
+    const p = document.createElement('div');
+    p.textContent = `> ${input.value}`;
+    output.appendChild(p);
+    
+    if (val === 'access') {
+      playSound(800, 'sine', 0.6);
+      const ok = document.createElement('div');
+      ok.className = 'sys';
+      ok.textContent = '✓ ДОСТУП НАДАНО. ФАЙЛ ПЕРЕДІСТОРІЇ ВІДКРИТО.';
+      output.appendChild(ok);
+      input.disabled = true;
+      setTimeout(() => {
+        noteScreen.style.display = 'flex';
+        playSound(400, 'sawtooth', 0.8);
+      }, 1800);
+    } else {
+      attempts++;
+      playSound(100, 'sawtooth', 0.3);
+      termBox.classList.add('shake');
+      setTimeout(() => termBox.classList.remove('shake'), 300);
+      const err = document.createElement('div');
+      err.className = 'err';
+      err.textContent = attempts >= 3 ? '⚠ ТЕРМІНАЛ ЗАБЛОКОВАНО НА 5 СЕКУНД' : '✗ НЕПРАВИЛЬНИЙ ПАРОЛЬ';
+      output.appendChild(err);
+      if (attempts >= 3) {
+        input.disabled = true;
+        attempts = 0;
+        setTimeout(() => { input.disabled = false; input.focus(); }, 5000);
+      }
+    }
+    input.value = '';
+    output.scrollTop = output.scrollHeight;
+  }
+});
+
+setTimeout(typeLine, 1000);
+</script>
+</body>
+</html>
